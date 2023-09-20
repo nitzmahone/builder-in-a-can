@@ -1,0 +1,33 @@
+version: 3
+
+images:
+  base_image:
+    name: quay.io/centos/centos:stream9
+
+dependencies:
+  python_interpreter:
+    python_path: '/usr/libexec/platform-python'
+  ansible_core:
+    package_pip: ansible-core
+  ansible_runner:
+    package_pip: ansible-runner
+  # install the collection we copied into our CWD during galaxy_prepend
+  galaxy:
+    collections:
+      - name: ansible.utils
+        type: dir
+        source: ansible.utils
+
+# copy the collection checkout we shared from the host into our build context
+additional_build_files:
+  - src: /host_files/ansible.utils
+    dest: ansible.utils
+
+
+additional_build_steps:
+  # have the Galaxy stage copy the collection checkout from the build context into its working dir
+  prepend_galaxy:
+  - COPY _build/ansible.utils ansible.utils
+
+options:
+  package_manager_path: '/bin/true'
